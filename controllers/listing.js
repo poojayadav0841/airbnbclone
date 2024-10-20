@@ -31,50 +31,61 @@ module.exports.showListing=async(req,res)=>{
     
 };
 
-module.exports.createListing=async(req,res,next)=>{
-     let response=await geocodingClient.forwardGeocode({
-        query: req.body.listing.location,
-        limit: 1,
-      })
-        .send();
-    
-        
-
-      let url=req.file.path;
-      let filename=req.file.filename;
-    //   console.log(url, "..",filename);
-    //  if(!req.body.listing){
-    //     throw new ExpressError(400,"Send valid data for listing");
-    //  }
-
-     // let{ title, description, image, price, location, country }=req.body;
-
-     let listing=req.body.listing;
-     const newListing=new Listing(listing);
-
-    //  if(!newListing.title){
-    //     throw new ExpressError(400,"title is missing");
-    //  }
-
-    //  if(!newListing.description){
-    //     throw new ExpressError(400,"description is missing");
-    //  }
-
-    //  if(!newListing.location){
-    //     throw new ExpressError(400,"location is missing");
-    //  }
+// module.exports.createListing=async(req,res,next)=>{
+//      let response=await geocodingClient.forwardGeocode({
+//         query: req.body.listing.location,
+//         limit: 1,
+//       })
+//         .send();
      
-     newListing.owner=req.user._id;
-    //  console.log(req.user);
-     newListing.image={url,filename};
-     newListing.geometry=response.body.features[0].geometry;
-     let savedListing=await newListing.save();
-     console.log(savedListing);
-     req.flash("success","New listing created");
-     // console.log(listing);
-     res.redirect("/listings");
+//      let url=req.file.path;
+//      let filename=req.file.filename;
+//      let listing=req.body.listing;
+//      const newListing=new Listing(listing);
+//      newListing.owner=req.user._id;
+//     //  console.log(req.user);
+//      newListing.image={url,filename};
+//      newListing.geometry=response.body.features[0].geometry;
+//      let savedListing=await newListing.save();
+//      console.log(savedListing);
+//      req.flash("success","New listing created");
+//      // console.log(listing);
+//      res.redirect("/listings");
    
+// };
+
+module.exports.createListing = async (req, res, next) => {
+    // If there's no user authenticated, this middleware will prevent execution here.
+    if (!req.isAuthenticated()) {
+        req.flash("error", "You must be logged in to create a listing.");
+        return res.redirect("/login");
+    }
+
+    try {
+        let response = await geocodingClient.forwardGeocode({
+            query: req.body.listing.location,
+            limit: 1,
+        }).send();
+
+        let url = req.file.path;
+        let filename = req.file.filename;
+
+        let listing = req.body.listing;
+        const newListing = new Listing(listing);
+
+        newListing.owner = req.user._id;
+        newListing.image = { url, filename };
+        newListing.geometry = response.body.features[0].geometry;
+
+        await newListing.save();
+        req.flash("success", "New listing created");
+        res.redirect("/listings");
+    } catch (error) {
+        req.flash("error", "Failed to create listing: " + error.message);
+        res.redirect("/listings/new");
+    }
 };
+
 
 module.exports.renderEditForm=async (req,res)=>{
     let {id}=req.params;

@@ -114,6 +114,17 @@ app.use((err,req,res,next)=>{
     // res.status(status).send(message);
     res.status(status).render("error.ejs",{message});
 })
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    res.locals.currUser = req.user;
+    // Check if there's a redirect URL in query parameters
+    if (req.query.redirect) {
+        res.locals.redirectUrl = req.query.redirect;
+    }
+    next();
+});
 app.listen(8080,()=>{
     console.log("server is listening on port 8080");
 })
