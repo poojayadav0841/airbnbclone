@@ -54,7 +54,7 @@ const store=MongoStore.create({
     touchAfter: 24 * 3600,
 });
 
-store.on("error",()=>{
+store.on("error",(err)=>{
     console.log("ERROR IN MONGO SESSOON STORE",err);
 });
 
@@ -64,7 +64,7 @@ const sessionOptions={
     resave: false,
     saveUninitialized: true,
     cookie:{
-        expires:Date.now() + 7 * 24 * 60 *60 *1000, // 7 days 24 hrs 60 min 60 sec 1000msec
+        expires: new Date(Date.now() + 7 * 24 * 60 *60 *1000), // 7 days 24 hrs 60 min 60 sec 1000msec
         maxAge:7 * 24 * 60 *60 *1000,
         httpOnly: true,
     }
@@ -89,8 +89,12 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
     res.locals.success=req.flash("success");
     res.locals.error=req.flash("error");
+    
     // console.log(res.locals.success);
     res.locals.currUser=req.user;
+    // if(req.query.redirect){
+    //     res.locals.redirectUrl=req.query.redirect;
+    // }
     next();
 });
 
@@ -115,16 +119,7 @@ app.use((err,req,res,next)=>{
     res.status(status).render("error.ejs",{message});
 })
 
-app.use((req, res, next) => {
-    res.locals.success = req.flash("success");
-    res.locals.error = req.flash("error");
-    res.locals.currUser = req.user;
-    // Check if there's a redirect URL in query parameters
-    if (req.query.redirect) {
-        res.locals.redirectUrl = req.query.redirect;
-    }
-    next();
-});
+
 app.listen(8080,()=>{
     console.log("server is listening on port 8080");
 })

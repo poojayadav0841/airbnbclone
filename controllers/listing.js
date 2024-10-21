@@ -76,9 +76,10 @@ module.exports.createListing = async (req, res, next) => {
         newListing.owner = req.user._id;
         newListing.image = { url, filename };
         newListing.geometry = response.body.features[0].geometry;
-
+        
         await newListing.save();
         req.flash("success", "New listing created");
+      
         res.redirect("/listings");
     } catch (error) {
         req.flash("error", "Failed to create listing: " + error.message);
@@ -121,8 +122,9 @@ module.exports.updateListing=async(req,res)=>{
 module.exports.destroyListing=async (req,res)=>{
     let {id}=req.params;
     let deletedListing=await Listing.findByIdAndDelete(id);
-    console.log(deletedListing);
     req.flash("success"," Listing Deleted");
+    console.log(deletedListing);
+    
     res.redirect("/listings");
  
  };

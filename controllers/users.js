@@ -13,6 +13,7 @@ module.exports.signup=async(req,res)=>{
         const newUser=new User({ email, username});
     
         const registeredUser=await User.register(newUser, password);
+        // req.flash("success","Welcome to WanderLust");
         console.log(registeredUser);
         req.login(registeredUser,(err)=>{
            if(err){
@@ -21,8 +22,8 @@ module.exports.signup=async(req,res)=>{
            req.flash("success","Welcome to WanderLust");
            res.redirect("/listings");        
         });
-    }catch(e){
-        req.flash("error",e.message);
+    }catch(err){
+        req.flash("error",err.message);
         res.redirect("/signup");
     } 
  };
@@ -41,7 +42,7 @@ module.exports.renderLoginForm=(req,res)=>{
 // };
 
 module.exports.login = async (req, res, next) => {
-    req.flash("success", "Welcome back to WanderLust!");
+   
 
     // The login method provided by passport will take care of checking credentials
     passport.authenticate('local', (err, user, info) => {
@@ -57,6 +58,7 @@ module.exports.login = async (req, res, next) => {
                 return next(err); // Passes the error to the error handler
             }
             // Successfully logged in, redirect to the specified URL or listings
+            req.flash("success", "Welcome back to WanderLust!");
             let redirectUrl = res.locals.redirectUrl || "/listings";
             res.redirect(redirectUrl);
         });
